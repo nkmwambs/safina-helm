@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: safina-application
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/nkmwambs/safina-helm.git
+    targetRevision: HEAD
+    path: safina-helm-chart
+  destination: 
+    server: https://kubernetes.default.svc
+    namespace: safina
+
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+
+    automated:
+      selfHeal: true
+      prune: true
