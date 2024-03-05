@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/nkmwambs/safina-helm.git
     targetRevision: HEAD
-    path: safina-helm-chart
+    path: chart
   destination: 
     server: https://kubernetes.default.svc
     namespace: safina
