@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ .Values.app.name | required "A valid app name is required!" }}-{{ .Values.app.environment | required "A valid environment name is required!" }}
+  name: {{ .Values.config.redis_server_name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+  - name: {{ .Values.app.name }}-redis-service
+    port: {{ .Values.config.redis_port | default 6379 }} 
+    protocol: TCP
+    targetPort: {{ .Values.config.redis_port | default 6379 }}  
+  selector:
+    run: {{ .Values.app.name }}-{{ .Values.app.environment }}-redis
+  type: ClusterIP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ .Values.app.name | required "A valid app name is required!" }}-{{ .Values.app.environment | required "A valid environment name is required!" }}
+    type: {{ .Values.app.name }}
+  name: {{ .Values.app.name }}-service
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+  - port: {{ .Values.service.port }}
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: {{ .Values.app.name }}-{{ .Values.app.environment }}-app 
+  type: {{ .Values.service.type }}

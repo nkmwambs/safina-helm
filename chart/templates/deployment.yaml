@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Values.app.name | required "A valid app name is required!" }}-{{ .Values.app.environment | required "A valid environment name is required!" }}
+  name: {{ .Values.app.name }}-{{ .Values.app.environment }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.replicaCount | default 2 }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}-{{ .Values.app.environment }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.rollingUpdate.maxSurge | quote}}
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable | quote }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}-{{ .Values.app.environment  }}
+        run: {{ .Values.app.name }}-{{ .Values.app.environment  }}-app
+    spec:
+      containers:
+      - image: {{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}
+        name: {{ .Values.app.name }}
+        envFrom:
+        - secretRef:
+            name: {{ .Values.app.name }}-{{ .Values.app.environment  }}-db-secret
+        - configMapRef:
+            name: {{ .Values.app.name }}-{{ .Values.app.environment }}-db-config
+        - configMapRef:
+            name: {{ .Values.app.name }}-{{ .Values.app.environment }}-app-config
+        - configMapRef:
+            name: {{ .Values.app.name }}-{{ .Values.app.environment }}-redis-config
+        ports:
+        - name: http
+          containerPort: 80
+        resources:
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}

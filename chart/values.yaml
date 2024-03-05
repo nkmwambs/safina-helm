@@ -1,0 +1,87 @@
+# It is advisable wheh you change the app.environment you consider changing the following:
+# 1. namespace
+# 2. service.port
+# 3. config
+
+app:
+  name: safina
+  environment: prod
+
+namespace: safina-ns
+
+service:
+  type: LoadBalancer
+  port: 8003
+
+replicaCount: 2
+
+image:
+  repository: nkarisa/safina
+  pullPolicy: Always
+  tag: "latest"
+
+emailCronjobImage:
+  repository: nkarisa/email-scheduler
+  pullPolicy: Always
+  tag: "latest"
+
+emailCronjobSpec:
+  schedule: "*/1 * * * *"
+
+resources: 
+  limits:
+    cpu: 2
+    memory: 2Gi
+  requests:
+    cpu: 1
+    memory: 1Gi
+
+cronJobresources: 
+  limits:
+    cpu: "500m"
+    memory: "500Mi"
+  requests:
+    cpu: "200m"
+    memory: "250Mi"
+
+quota: 
+  limits:
+    cpu: 6
+    memory: 10Gi
+  requests:
+    cpu: 6
+    memory: 10Gi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+rollingUpdate:
+  maxSurge: 25%
+  maxUnavailable: 25%
+
+config:
+  passwd_salt: Y29tcGFzc2lvbl9pbnRlcm5hdGlvbmFsX21pc3Npb25fMjAyMm1fQF9TYUxU # This is a base64 encode text: To encode: echo -n "mypassword" | base64 and To decode echo encodepassword | base64 --decode
+  base_url: http://developer.guru
+  redis_port: 6379
+  redis_server_name: database-redis
+  database:
+    read_node:
+      name: toolkit
+      host: host.docker.internal
+      user: toolkit
+      passwd: Q29tcGFzc2lvbjEyMw== # This is a base64 encode text: To encode: echo -n "mypassword" | base64 and To decode echo encodepassword | base64 --decode
+    write_node:
+      name: toolkit
+      host: host.docker.internal
+      user: toolkit
+      passwd: Q29tcGFzc2lvbjEyMw== # This is a base64 encode text: To encode: echo -n "mypassword" | base64 and To decode echo encodepassword | base64 --decode

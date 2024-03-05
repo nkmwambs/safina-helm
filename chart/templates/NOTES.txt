@@ -1,0 +1,5 @@
+========================================================================================
+Thank you for installing {{ .Chart.Name }}.
+
+Use {{ printf "%s%s%d%s" .Values.config.base_url ":" (int .Values.service.port) "/" }} to access the application
+

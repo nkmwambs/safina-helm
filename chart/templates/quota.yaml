@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ .Values.app.name }}-{{ .Values.app.environment }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.app.name | required "A valid app name is required!" }}-{{ .Values.app.environment | required "A valid environment name is required!" }}
+spec:
+  hard:
+    limits.cpu: {{ .Values.quota.limits.cpu }}
+    limits.memory: {{ .Values.quota.limits.memory }}
+    requests.cpu: {{ .Values.quota.requests.cpu }}
+    requests.memory: {{ .Values.quota.requests.memory }}

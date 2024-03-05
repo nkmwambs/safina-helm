@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.app.name | required "A valid app name is required!" }}-{{ .Values.app.environment | required "A valid environment name is required!" }}-cronjob
+  namespace: {{ .Values.namespace }}
+spec:
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 1
+  schedule: {{ .Values.emailCronjobSpec.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: {{ .Values.app.name | required "A valid app name is required!" }}-{{ .Values.app.environment | required "A valid environment name is required!" }}-email-scheduler
+            image: {{ .Values.emailCronjobImage.repository }}:{{ .Values.emailCronjobImage.tag | default "latest" }}
+            args: ['/bin/sh', '-c', '/usr/local/bin/php /var/www/html/index.php cron send_email_cron_task; echo Job ran successfully']
+            envFrom:
+            - configMapRef:
+                name: {{ .Values.app.name }}-{{ .Values.app.environment }}-db-config
+            - configMapRef:
+                name: {{ .Values.app.name }}-{{ .Values.app.environment }}-smtp-config
+            - secretRef:
+                name: {{ .Values.app.name }}-{{ .Values.app.environment }}-db-secret
+            - secretRef:
+                name: {{ .Values.app.name }}-{{ .Values.app.environment }}-smtp-secret
+            resources:
+              limits:
+                cpu: {{ .Values.cronJobresources.limits.cpu }}
+                memory: {{ .Values.cronJobresources.limits.memory }}
+              requests:
+                cpu: {{ .Values.cronJobresources.requests.cpu }}
+                memory: {{ .Values.cronJobresources.requests.memory }}
+          restartPolicy: OnFailure
+
+
